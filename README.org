@@ -1,0 +1,63 @@
+#+Title: Cache TCP process and port inventory
+
+By default CFEngine Enterprise inventories ports that are listening. This works
+as long as =cf-monitord= is running.
+
+This policy caches inventory data to
+=$(cached_inventory_load.cachedir)/module_protocol/cache_tcp_process_port_inventory.cache=
+for listening TCP ports and the associated process. It requires
+[[https://github.com/cfengine-content/cached_inventory][cfengine_content:cached_inventory]] for reporting cached values. This policy does
+not require =cf-monitord= in order to work.
+
+* Usage :ATTACH:
+:PROPERTIES:
+:ID:       27d7140e-5691-400d-b3a9-74d67f4f8ab4
+:Attachments: 2017-11-16_Selection_004_2017-11-16_16-09-28.png
+:END:
+
+#+DOWNLOADED: file:///home/nickanderson/Pictures/Screenshots/2017-11-16_Selection_004.png @ 2017-11-16 16:09:30
+[[file:data/27/d7140e-5691-400d-b3a9-74d67f4f8ab4/2017-11-16_Selection_004_2017-11-16_16-09-28.png]]
+
+** Configure cache retention
+
+The default cache retention is 1 day. To override this define
+=def.cache_tcp_process_port_inventory=.
+
+Example Augments:
+
+- Include this policy in inputs
+- Include [[https://github.com/cfengine-content/cached_inventory][cfengine_content:cached_inventory]] in inputs
+- Add this policy and [[https://github.com/cfengine-content/cached_inventory][cfengine_content:cached_inventory]] to bundlesequence
+- Override this policies cache retention setting it to 1 minute
+ 
+#+BEGIN_SRC json
+  {
+      "inputs": [
+          "services/cached-inventory/policy/main.cf",
+          "services/cache-tcp-process-port-inventory/policy/main.cf"
+      ],
+      "vars": {
+          "control_common_bundlesequence_end": [ "cache_tcp_process_port_inventory", "cached_inventory" ],
+          "cache_tcp_process_port_inventory":{ "retention": "1" }
+      }
+  }
+#+END_SRC
+
+* Installation
+
+1. Clone the repository
+
+   #+BEGIN_SRC shell 
+     git clone https://github.com/cfengine-content/cache-tcp-process-port-inventory
+   #+END_SRC
+   
+2. Change into the repository and run ~make install~
+
+   #+BEGIN_SRC shell 
+     cd cache-tcp-process-port-inventory
+     make install
+   #+END_SRC
+ 
+4. Ensure =main.cf= is included in your policy inputs (ref [[./def.json]] )
+
+5. Ensure =cache_tcp_process_port_inventory= is added to the bundlesequence. (ref [[./def.json]] )

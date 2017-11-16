@@ -1,0 +1,9 @@
+{
+    "inputs": [
+        "services/cache-tcp-process-port-inventory/policy/main.cf"
+    ],
+    "vars": {
+        "control_common_bundlesequence_end": [ "cache_tcp_process_port_inventory" ]
+    }
+
+}

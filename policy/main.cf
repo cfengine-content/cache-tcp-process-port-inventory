@@ -1,0 +1,26 @@
+bundle agent cache_tcp_process_port_inventory_holder{}
+bundle agent cache_tcp_process_port_inventory
+{
+  vars:
+      "cache" string => "$(cached_inventory_load.cachedir)/module_protocol/$(this.bundle).cache";
+
+      "retention"
+        comment => "Cache retention for 1 day unless overridden by def.cache_tcp_process_port_inventory[retention]",
+        string => ifelse( isvariable( "def.cache_tcp_process_port_inventory[retention]"), "$(def.cache_tcp_process_port_inventory[retention])", "1440" );
+
+  files:
+      "$(cache)"
+        comment => "We don't trust caches that are older than $(retention) minutes so we purge them",
+        delete => default:tidy,
+        file_select => default:older_than(0, 0, 0, 0, $(retention), 0);
+
+  commands:
+
+      "$(paths.netstat) -ltpn | $(paths.awk) 'BEGIN {print \"^context=cache_tcp_process_port_inventory_holder\"; print \"^meta=inventory,attribute_name=TCP process port\"} sub(/.*:/, \"\", $4) { sub(/.*\//, \"\", $7); if (!($4 in seen)) {printf \"=port[%d]=%s %d\n\", $4, $7, $4}; seen[$4] }' > $(cache)"
+        contain => in_shell,
+        if => not( fileexists( $(cache) ));
+
+  reports:
+    "DEBUG|DEBUG_$(this.bundle)"::
+      "Cache retention is $(retention)";
+}
